@@ -5,6 +5,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+// TODO LIST
+// create win condition
+// create game over screen
+// create win screen
+// create main menu
+// properly align the collisions on the right hand border
+// fix collisions now that there are multiple rows of bricks
+
 public class GamePlay extends JPanel implements ActionListener, KeyListener {
     private int bottomBorder = 500;
     private int rightBorder = 400;
@@ -25,7 +33,7 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
     private int brickWidth = 60;
     private int brickHeight = 20;
     private int brickGapSize = 10;
-    private boolean[][] bricks; // Array to keep track of bricks
+    private boolean[][] bricks; // boolean matrix to keep track of broken vs unbroken bricks
 
     private int brickRowAmt = 2;
     private int brickColAmt = 4;
