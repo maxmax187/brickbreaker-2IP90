@@ -1,9 +1,10 @@
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import javax.swing.*;
+
 
 //!!!!!!!!!!!!!!
 // to remember: objects origin coordinates are top-left
@@ -29,7 +30,7 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
     private int ballY = 1; // Ball Y-coordinate 450
     private int ballXSpeed = -2; // Ball X-speed
     private int ballYSpeed = -2; // Ball Y-speed
-    private int ballSize = 10;
+    private int ballSize = 10; // diameter of the ball
 
     private int paddleX = 100; // Paddle X-coordinate
     private int paddleY = 480;
@@ -40,7 +41,7 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
     private int brickY = 50; // Brick Y-coordinate
     private int brickWidth = 60;
     private int brickHeight = 20;
-    private int brickGapSize = 10;
+    private int brickGapSize = 10;  // gap in between the bricks both vertically and horizontally
     private boolean[][] bricks; // boolean matrix to keep track of broken vs unbroken bricks
 
     private int brickRowAmt = 2;
@@ -92,8 +93,8 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
 
 
         // Ball-paddle collision
-        // TODO re-examine
-        if (ballY + ballSize / 2 > paddleY - paddleHeight && ballX >= paddleX && ballX <= paddleX + paddleWidth) {
+        // TODO re-examine, compare to brick collision check
+        if (ballY + ballSize >= paddleY - paddleHeight && ballX >= paddleX && ballX <= paddleX + paddleWidth) {
             ballYSpeed = -ballYSpeed;
         }
 
