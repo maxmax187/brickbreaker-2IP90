@@ -5,6 +5,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+//!!!!!!!!!!!!!!
+// to remember: objects origin coordinates are top-left
+
 // TODO LIST
 // create win condition
 // create game over screen
@@ -12,16 +15,21 @@ import java.awt.event.KeyListener;
 // create main menu
 // properly align the collisions on the right hand border
 // fix collisions now that there are multiple rows of bricks
+// split creation of the map from the gameplay??
+
+// add comments everywhere/ follow coding standard
 
 public class GamePlay extends JPanel implements ActionListener, KeyListener {
+    public boolean playing = false;
+
     private int bottomBorder = 500;
     private int rightBorder = 400;
 
-    private int ballX = 100; // Ball X-coordinate
-    private int ballY = 450; // Ball Y-coordinate
+    private int ballX = 1; // Ball X-coordinate 100
+    private int ballY = 1; // Ball Y-coordinate 450
     private int ballXSpeed = -2; // Ball X-speed
     private int ballYSpeed = -2; // Ball Y-speed
-    private int ballSize = 20;
+    private int ballSize = 10;
 
     private int paddleX = 100; // Paddle X-coordinate
     private int paddleY = 480;
@@ -67,20 +75,24 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
         for (int i = 0; i < bricks.length; i++) {
             for (int j = 0; j < bricks[i].length; j++) {
                 if (bricks[i][j]) {
-                    g.fillRect(brickX + i * (brickWidth + brickGapSize), brickY + j * (brickHeight + brickGapSize), brickWidth, brickHeight);
+                    int x = brickX + i * (brickWidth + brickGapSize);
+                    int y = brickY + j * (brickHeight + brickGapSize);
+                    g.fillRect(x, y, brickWidth, brickHeight);
                 }
             }
-            //TODO brickY increase
-            // brickY -= 20;
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ballX += ballXSpeed;
-        ballY += ballYSpeed;
+        if (playing) {
+            ballX += ballXSpeed;
+            ballY += ballYSpeed;    
+        }
+
 
         // Ball-paddle collision
+        // TODO re-examine
         if (ballY + ballSize / 2 > paddleY - paddleHeight && ballX >= paddleX && ballX <= paddleX + paddleWidth) {
             ballYSpeed = -ballYSpeed;
         }
@@ -88,7 +100,16 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
         // Ball-brick collisions
         for (int i = 0; i < bricks.length; i++) {
             for (int j = 0; j < bricks[i].length; j++) {
-                if (bricks[i][j] && ballY <= brickY + 20 && ballX >= brickX + i * 70 && ballX <= brickX + i * 70 + 60) {
+                int brickXMin = brickX + (brickWidth + brickGapSize) * i;
+                int brickXMax = brickX + (brickWidth + brickGapSize) * (i + 1);
+                boolean touchingBrickX = (ballX + ballSize >= brickXMin) && (ballX <= brickXMax);
+
+                int brickYMin = brickY + (brickHeight + brickGapSize) * j;
+                int brickYMax = brickY + (brickHeight + brickGapSize) * (j + 1);
+                boolean touchingBrickY = (ballY + ballSize >= brickYMin) && (ballY <= brickYMax);
+
+                // TODO what if ball hits the side of a brick
+                if (bricks[i][j] && touchingBrickY && touchingBrickX) {
                     bricks[i][j] = false;
                     ballYSpeed = -ballYSpeed;
                 }
@@ -118,6 +139,10 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
+        if (key == KeyEvent.VK_ENTER) {
+            playing = !playing;
+        }
+
         if (key == KeyEvent.VK_LEFT && paddleX > 0) {
             paddleX -= 20;
         }
