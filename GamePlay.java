@@ -99,6 +99,7 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
         }
 
         // Ball-brick collisions
+        // TODO re-make using rectangle.intersects()
         for (int i = 0; i < bricks.length; i++) {
             for (int j = 0; j < bricks[i].length; j++) {
                 int brickXMin = brickX + (brickWidth + brickGapSize) * i;
