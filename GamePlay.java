@@ -1,9 +1,9 @@
 import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.Rectangle;
 import javax.swing.*;
 
 
@@ -17,8 +17,6 @@ import javax.swing.*;
 // create win screen
 // create main menu
 // properly align the collisions on the right hand border
-// fix collisions now that there are multiple rows of bricks
-// split creation of the map from the gameplay??
 
 // add comments everywhere/ follow coding standard
 
@@ -36,9 +34,9 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
 
     private int ballX = 1; // Ball X-coordinate 100
     private int ballY = 1; // Ball Y-coordinate 450
-    private int ballXSpeed = -2; // Ball X-speed
-    private int ballYSpeed = -2; // Ball Y-speed
-    private int ballSize = 10; // diameter of the ball
+    private int ballXSpeed = -1; // Ball X-speed
+    private int ballYSpeed = -1; // Ball Y-speed
+    private int ballSize = 30; // diameter of the ball
 
     private int paddleX = 100; // Paddle X-coordinate
     private int paddleY = 480;
@@ -54,6 +52,7 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
 
     private int brickRowAmt = 2;
     private int brickColAmt = 4;
+    private int totalBricks;
 
     /**
      *  Start of the main event loop of the game.
@@ -65,6 +64,7 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
         rightBorder = width;
 
         brickMap = new MapGen(brickRowAmt, brickColAmt); // Initialize the brick matrix
+        totalBricks = brickRowAmt * brickColAmt;
 
         Timer timer = new Timer(5, this);
         timer.start();
@@ -104,7 +104,7 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
             ballX += ballXSpeed;
             ballY += ballYSpeed;    
         } else { 
-            return; //!!!!!!!!!!!!!!
+            return;
         }
 
 
@@ -125,12 +125,18 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
 
                 if (brickMap.brickMap[i][j] && ballObj.intersects(brickObj)) {
                     brickMap.setBricksValue(false, i, j);
+                    totalBricks--;
                     ballYSpeed = -ballYSpeed;  
                 }
             }
-
         }
 
+        // Win condition
+        if (totalBricks <= 0) {
+            playing = false;
+            // TODO: add win screen
+        }
+        
         // Border collisions
         if (ballX <= 0 || ballX + ballSize >= rightBorder) {
             ballXSpeed = -ballXSpeed;
@@ -147,7 +153,7 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
             removeAll();
             // Game over
             // TODO add game over menu
-            // System.exit(0);
+            // System.exit(0); // exits the application
         }
 
         repaint();
@@ -163,8 +169,8 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
         if (key == KeyEvent.VK_LEFT && paddleX > 0) {
             paddleX -= 20;
         }
-        if (key == KeyEvent.VK_RIGHT && paddleX < rightBorder - paddleWidth) { // TODO properly align with window border
-            paddleX += 20;
+        if (key == KeyEvent.VK_RIGHT && paddleX < rightBorder - paddleWidth) { 
+            paddleX += 20; // TODO properly align with window border
         }
     }
 
