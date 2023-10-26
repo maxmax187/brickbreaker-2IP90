@@ -3,7 +3,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.Rectangle;
 import javax.swing.*;
+
 
 
 //!!!!!!!!!!!!!!
@@ -20,11 +22,17 @@ import javax.swing.*;
 
 // add comments everywhere/ follow coding standard
 
+/**
+ *  Main gameplay loop, including starting a game, keeping track of ball, paddle & bricks and 
+ *  game completion.
+ */
 public class GamePlay extends JPanel implements ActionListener, KeyListener {
-    public boolean playing = false;
+    private boolean playing = false;
+    private MapGen brickMap;
 
-    private int bottomBorder = 500;
-    private int rightBorder = 400;
+    // borders, later defined to be the same as window borders defined in Main.java
+    private int bottomBorder;   
+    private int rightBorder;
 
     private int ballX = 1; // Ball X-coordinate 100
     private int ballY = 1; // Ball Y-coordinate 450
@@ -42,18 +50,21 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
     private int brickWidth = 60;
     private int brickHeight = 20;
     private int brickGapSize = 10;  // gap in between the bricks both vertically and horizontally
-    private boolean[][] bricks; // boolean matrix to keep track of broken vs unbroken bricks
+    // private boolean[][] brickMap; // boolean matrix to keep track of broken vs unbroken bricks
 
     private int brickRowAmt = 2;
     private int brickColAmt = 4;
 
-    public GamePlay() {
-        bricks = new boolean[brickColAmt][brickRowAmt]; // Initialize the brick array
-        for (int i = 0; i < bricks.length; i++) {
-            for (int j = 0; j < bricks[i].length; j++) {
-                bricks[i][j] = true; // All bricks are initially present
-            }
-        }
+    /**
+     *  Start of the main event loop of the game.
+     * @param width width of the window specified in Main.java.
+     * @param height height of the window specified in Main.java.
+     */
+    public GamePlay(int width, int height) {
+        bottomBorder = (int) Math.floor(height * 0.95);
+        rightBorder = width;
+
+        brickMap = new MapGen(brickRowAmt, brickColAmt); // Initialize the brick matrix
 
         Timer timer = new Timer(5, this);
         timer.start();
@@ -61,6 +72,9 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void paintComponent(Graphics g) {
+        if (!playing) {
+            return;
+        }
         super.paintComponent(g);
 
         // Draw the ball
@@ -73,9 +87,9 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
 
         // Draw the bricks
         g.setColor(Color.GREEN);
-        for (int i = 0; i < bricks.length; i++) {
-            for (int j = 0; j < bricks[i].length; j++) {
-                if (bricks[i][j]) {
+        for (int i = 0; i < brickMap.brickMap.length; i++) {
+            for (int j = 0; j < brickMap.brickMap[i].length; j++) {
+                if (brickMap.brickMap[i][j]) {
                     int x = brickX + i * (brickWidth + brickGapSize);
                     int y = brickY + j * (brickHeight + brickGapSize);
                     g.fillRect(x, y, brickWidth, brickHeight);
@@ -89,31 +103,29 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
         if (playing) {
             ballX += ballXSpeed;
             ballY += ballYSpeed;    
+        } else { 
+            return; //!!!!!!!!!!!!!!
         }
 
 
         // Ball-paddle collision
-        // TODO re-examine, compare to brick collision check
-        if (ballY + ballSize >= paddleY - paddleHeight && ballX >= paddleX && ballX <= paddleX + paddleWidth) {
+        Rectangle ballObj = new Rectangle(ballX, ballY, ballSize, ballSize);
+        Rectangle paddleObj = new Rectangle(paddleX, paddleY, paddleWidth, paddleHeight);
+        if (ballObj.intersects(paddleObj)) {
             ballYSpeed = -ballYSpeed;
         }
 
         // Ball-brick collisions
-        // TODO re-make using rectangle.intersects()
-        for (int i = 0; i < bricks.length; i++) {
-            for (int j = 0; j < bricks[i].length; j++) {
-                int brickXMin = brickX + (brickWidth + brickGapSize) * i;
-                int brickXMax = brickX + (brickWidth + brickGapSize) * (i + 1);
-                boolean touchingBrickX = (ballX + ballSize >= brickXMin) && (ballX <= brickXMax);
+        for (int i = 0; i < brickMap.brickMap.length; i++) {
+            for (int j = 0; j < brickMap.brickMap[i].length; j++) {    
+                int brickObjX = brickX + (brickWidth + brickGapSize) * i;
+                int brickObjY = brickY + (brickHeight + brickGapSize) * j;
 
-                int brickYMin = brickY + (brickHeight + brickGapSize) * j;
-                int brickYMax = brickY + (brickHeight + brickGapSize) * (j + 1);
-                boolean touchingBrickY = (ballY + ballSize >= brickYMin) && (ballY <= brickYMax);
+                Rectangle brickObj = new Rectangle(brickObjX, brickObjY, brickWidth, brickHeight);
 
-                // TODO what if ball hits the side of a brick
-                if (bricks[i][j] && touchingBrickY && touchingBrickX) {
-                    bricks[i][j] = false;
-                    ballYSpeed = -ballYSpeed;
+                if (brickMap.brickMap[i][j] && ballObj.intersects(brickObj)) {
+                    brickMap.setBricksValue(false, i, j);
+                    ballYSpeed = -ballYSpeed;  
                 }
             }
 
@@ -130,9 +142,12 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
         }
 
         if (ballY >= bottomBorder) {
+            playing = false;
+            System.out.println(ballX);
+            removeAll();
             // Game over
             // TODO add game over menu
-            System.exit(0);
+            // System.exit(0);
         }
 
         repaint();
