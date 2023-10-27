@@ -2,8 +2,6 @@ import java.awt.*;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import javax.swing.*;
 
 
@@ -24,7 +22,7 @@ import javax.swing.*;
  *  Main gameplay loop, including starting a game, keeping track of ball, paddle & bricks and 
  *  game completion.
  */
-public class GamePlay extends JPanel implements ActionListener, KeyListener {
+public class GamePlay extends JPanel implements ActionListener {
     private boolean playing = false;
     private MapGen brickMap;
 
@@ -34,9 +32,9 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
 
     private int ballX = 1; // Ball X-coordinate 100
     private int ballY = 1; // Ball Y-coordinate 450
-    private int ballXSpeed = -1; // Ball X-speed
-    private int ballYSpeed = -1; // Ball Y-speed
-    private int ballSize = 30; // diameter of the ball
+    private int ballXSpeed = -2; // Ball X-speed
+    private int ballYSpeed = -2; // Ball Y-speed
+    private int ballSize = 15; // diameter of the ball
 
     private int paddleX = 100; // Paddle X-coordinate
     private int paddleY = 480;
@@ -159,28 +157,27 @@ public class GamePlay extends JPanel implements ActionListener, KeyListener {
         repaint();
     }
 
-    @Override
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-        if (key == KeyEvent.VK_ENTER) {
-            playing = !playing;
-        }
-
-        if (key == KeyEvent.VK_LEFT && paddleX > 0) {
+    // TODO variable paddle movement amt
+    /**
+     *  move paddle to the left if it is not already touching the window border.
+     */
+    public void moveLeft() {
+        if (paddleX > 0) {
             paddleX -= 20;
         }
-        if (key == KeyEvent.VK_RIGHT && paddleX < rightBorder - paddleWidth) { 
+    }
+
+    // TODO variable paddle movement amt
+    /**
+     *  move paddle to the right if it is not already touching the window border.
+     */
+    public void moveRight() {
+        if (paddleX < rightBorder - paddleWidth) {
             paddleX += 20; // TODO properly align with window border
         }
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
+    public void startGame() {
+        playing = !playing;
     }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-    }
-
-
 }
