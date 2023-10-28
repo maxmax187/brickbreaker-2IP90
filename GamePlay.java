@@ -13,7 +13,6 @@ import javax.swing.*;
 // create game over screen
 // create win screen
 // create main menu
-// properly align the collisions on the right hand border
 
 // add comments everywhere/ follow coding standard
 
@@ -173,26 +172,25 @@ public class GamePlay extends JPanel implements ActionListener {
         repaint();
     }
 
-    // TODO variable paddle movement amt
     /**
      *  move paddle to the left if it is not already touching the window border.
      */
     public void moveLeft() {
         if (paddleX > 0) {
-            paddleX -= 20;
+            paddleX -= (int) Math.floor(paddleWidth / 3);
         }
     }
 
-    // TODO variable paddle movement amt
     /**
      *  move paddle to the right if it is not already touching the window border.
      */
     public void moveRight() {
         if (paddleX < rightBorder - paddleWidth) {
-            paddleX += 20; // TODO properly align with window border
+            paddleX += (int) Math.floor(paddleWidth / 3); 
         }
     }
 
+    // TODO fix game over replay & stuff
     public void startGame() {
         System.out.println("enter");
         if (playing) {

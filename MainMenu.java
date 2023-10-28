@@ -5,7 +5,7 @@ import javax.swing.*;
 
 
 /**
- * 
+ *  Main menu class for the main menu screen.
  */
 public class MainMenu extends JPanel {
     private JButton playButton;
