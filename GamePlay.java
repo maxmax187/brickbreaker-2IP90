@@ -1,5 +1,4 @@
 import java.awt.*;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
@@ -24,6 +23,7 @@ import javax.swing.*;
  */
 public class GamePlay extends JPanel implements ActionListener {
     private boolean playing = false;
+    private boolean finished = false;
     private MapGen brickMap;
 
     // borders, later defined to be the same as window borders defined in Main.java
@@ -46,7 +46,6 @@ public class GamePlay extends JPanel implements ActionListener {
     private int brickWidth = 60;
     private int brickHeight = 20;
     private int brickGapSize = 10;  // gap in between the bricks both vertically and horizontally
-    // private boolean[][] brickMap; // boolean matrix to keep track of broken vs unbroken bricks
 
     private int brickRowAmt = 2;
     private int brickColAmt = 4;
@@ -70,10 +69,30 @@ public class GamePlay extends JPanel implements ActionListener {
 
     @Override
     public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        if (finished) {
+            // Clear the panel
+            g.setColor(Color.BLACK); // Set the color to clear the screen
+            g.fillRect(0, 0, getWidth(), getHeight());
+
+            // Display text for game over or win
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 30));
+
+            String text = totalBricks <= 0 ? "You won!" : "Game Over!"; // check win condition
+            int textWidth = g.getFontMetrics().stringWidth(text);
+            g.drawString(text, (getWidth() - textWidth) / 2, getHeight() / 2);
+
+            String enterString = "press ENTER to try again!";
+            textWidth = g.getFontMetrics().stringWidth(enterString);
+            int textHeight = (int) Math.floor(getHeight() * 0.6);
+            g.drawString(enterString, (getWidth() - textWidth) / 2, textHeight);
+        }
+
         if (!playing) {
             return;
         }
-        super.paintComponent(g);
 
         // Draw the ball
         g.setColor(Color.RED);
@@ -132,7 +151,7 @@ public class GamePlay extends JPanel implements ActionListener {
         // Win condition
         if (totalBricks <= 0) {
             playing = false;
-            // TODO: add win screen
+            finished = true;
         }
         
         // Border collisions
@@ -147,10 +166,7 @@ public class GamePlay extends JPanel implements ActionListener {
 
         if (ballY >= bottomBorder) {
             playing = false;
-            System.out.println(ballX);
-            removeAll();
-            // Game over
-            // TODO add game over menu
+            finished = true;
             // System.exit(0); // exits the application
         }
 
@@ -178,6 +194,11 @@ public class GamePlay extends JPanel implements ActionListener {
     }
 
     public void startGame() {
-        playing = !playing;
+        System.out.println("enter");
+        if (playing) {
+            return;
+        }
+        playing = true;
+        finished = false;
     }
 }

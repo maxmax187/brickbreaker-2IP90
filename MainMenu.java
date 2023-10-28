@@ -11,10 +11,6 @@ public class MainMenu extends JPanel {
     private JButton playButton;
 
     public MainMenu() {
-        initializeComponents();
-    }
-
-    private void initializeComponents() {
         setLayout(new BorderLayout());
 
         // Create a panel to center the play button

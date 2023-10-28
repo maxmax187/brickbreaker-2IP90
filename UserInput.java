@@ -7,8 +7,8 @@ import java.awt.event.KeyListener;
 public class UserInput implements KeyListener {
     private GamePlay gamePlay;
 
-    public void initialize(GamePlay instance) {
-        gamePlay = instance;
+    public UserInput(GamePlay instance) {
+        this.gamePlay = instance;
     }
 
     @Override
