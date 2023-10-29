@@ -20,8 +20,9 @@ public class GamePlay extends JPanel implements ActionListener {
 
     private int ballX; // Ball X-coordinate 100
     private int ballY; // Ball Y-coordinate 450
-    private int ballXSpeed = 0; // Ball X-speed
-    private int ballYSpeed = -4; // Ball Y-speed
+    private int speed = 4;
+    private int ballXSpeed; // Ball X-speed
+    private int ballYSpeed; // Ball Y-speed
     private int ballSize = 16; // diameter of the ball          15!!!!
     private int ballRadius = (int) Math.floor(ballSize / 2); 
 
@@ -160,6 +161,7 @@ public class GamePlay extends JPanel implements ActionListener {
 
             double distance = ballCenter - paddleCenter;
             ballXSpeed = (int) Math.round(distance / (paddleWidth / Math.abs(ballYSpeed)));
+            System.out.println("test");
             oneTickDelay = true;
         }
 
@@ -255,12 +257,9 @@ public class GamePlay extends JPanel implements ActionListener {
         ballX = (int) Math.round(paddleX + (paddleWidth / 2) - ballRadius);
         ballY = (int) Math.round(paddleY - (1.2 * ballSize)); 
 
-        ballXSpeed = 0;
-        int absSpeed = Math.abs(ballYSpeed);
-        do {
-            // Generate a random number between -4 and 4 (excluding 0)
-            ballXSpeed = (int) (Math.floor(Math.random() * (absSpeed * 2 - 1)) - absSpeed);
-        } while (ballXSpeed == 0);
+        // Generate a direction for ball to shoot awway with
+        ballXSpeed = (int) (Math.floor(Math.random() * (speed * 2 - 1)) - speed);
+        ballYSpeed = -speed;
 
         playing = true;
         finished = false;
