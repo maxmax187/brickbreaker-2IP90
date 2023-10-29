@@ -31,14 +31,15 @@ public class GamePlay extends JPanel implements ActionListener {
 
     private int ballX; // Ball X-coordinate 100
     private int ballY; // Ball Y-coordinate 450
-    private int ballXSpeed = -2; // Ball X-speed
-    private int ballYSpeed = -2; // Ball Y-speed
-    private int ballSize = 15; // diameter of the ball          15!!!!
+    private int ballXSpeed = 0; // Ball X-speed
+    private int ballYSpeed = -4; // Ball Y-speed
+    private int ballSize = 16; // diameter of the ball          15!!!!
+    private int ballRadius = (int) Math.floor(ballSize / 2); 
 
     private int paddleX; // Paddle X-coordinate
     private int paddleY;
     private int paddleWidth = 60; // Paddle width
-    private int paddleHeight = 10;
+    private int paddleHeight = 8;
 
     private int brickX; // Brick matrix generation left most starting X-coordinate
     private int brickY; // Brick matrix generation upper most starting Y-coordinate
@@ -70,8 +71,8 @@ public class GamePlay extends JPanel implements ActionListener {
         paddleX = (int) Math.floor(width / 2 - (paddleWidth / 2));
         paddleY = (int) Math.floor(height * 0.90 - paddleHeight);
 
-        ballX = (int) Math.round(paddleX + (paddleWidth / 2) - (ballSize / 2));
-        ballY = (int) Math.round(paddleY - (1.1 * ballSize)); 
+        ballX = (int) Math.round(paddleX + (paddleWidth / 2) - ballRadius);
+        ballY = (int) Math.round(paddleY - (1.2 * ballSize)); 
 
         // Initialize event loop.
         Timer timer = new Timer(5, this);
@@ -95,10 +96,10 @@ public class GamePlay extends JPanel implements ActionListener {
             int textWidth = g.getFontMetrics().stringWidth(text);
             g.drawString(text, (getWidth() - textWidth) / 2, getHeight() / 2);
 
-            String enterString = "press ENTER to try again!";
-            textWidth = g.getFontMetrics().stringWidth(enterString);
-            int textHeight = (int) Math.floor(getHeight() * 0.6);
-            g.drawString(enterString, (getWidth() - textWidth) / 2, textHeight);
+            // String enterString = "press ENTER to try again!";
+            // textWidth = g.getFontMetrics().stringWidth(enterString);
+            // int textHeight = (int) Math.floor(getHeight() * 0.6);
+            // g.drawString(enterString, (getWidth() - textWidth) / 2, textHeight);
         }
 
         if (!playing) {
@@ -145,8 +146,14 @@ public class GamePlay extends JPanel implements ActionListener {
         // Ball-paddle collision
         Rectangle ballObj = new Rectangle(ballX, ballY, ballSize, ballSize);
         Rectangle paddleObj = new Rectangle(paddleX, paddleY, paddleWidth, paddleHeight);
+
         if (ballObj.intersects(paddleObj)) {
             ballYSpeed = -ballYSpeed;
+            double paddleCenter = paddleWidth / 2 + paddleX;
+            int ballCenter = ballX + ballRadius;
+
+            double distance = ballCenter - paddleCenter;
+            ballXSpeed = (int) Math.round(distance / (paddleWidth / Math.abs(ballYSpeed)));
             oneTickDelay = true;
         }
 
@@ -160,9 +167,27 @@ public class GamePlay extends JPanel implements ActionListener {
                 Rectangle brickObj = new Rectangle(brickObjX, brickObjY, brickWidth, brickHeight);
 
                 if (brickMap.brickMap[i][j] && ballObj.intersects(brickObj)) {
+                    // Get the center of the ball for collision direction analysis
+                    int ballCenterX = ballX + ballRadius;
+                    int ballCenterY = ballY + ballRadius;
+                    
+                    // Calculate the distance between ball and brick edges
+                    int dx = Math.min(Math.abs(ballCenterX - brickObjX), 
+                        Math.abs(ballCenterX - (brickObjX + brickObj.width)));
+                    int dy = Math.min(Math.abs(ballCenterY - brickObjY), 
+                            Math.abs(ballCenterY - (brickObjY + brickObj.height)));
+
+                    // Check collision direction based on the distances
+                    if (dx == dy) { // if the ball collides with the corner of a block
+                        ballXSpeed = -ballXSpeed;
+                        ballYSpeed = -ballYSpeed;
+                    } else if (dx < dy) {   // horizontal collision
+                        ballXSpeed = -ballXSpeed;
+                    } else {    // vertical collision
+                        ballYSpeed = -ballYSpeed;
+                    }
                     brickMap.setBricksValue(false, i, j);
                     totalBricks--;
-                    ballYSpeed = -ballYSpeed;  
                     oneTickDelay = true;
                     break outerloop; // part of preventing multiple block collision in 1 tick
                 }
