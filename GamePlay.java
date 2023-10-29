@@ -113,8 +113,6 @@ public class GamePlay extends JPanel implements ActionListener {
             textWidth = g.getFontMetrics().stringWidth(spaceString);
             textHeight = (int) Math.floor(getHeight() * 0.50);
             g.drawString(spaceString, (getWidth() - textWidth) / 2, textHeight);
-
-
             return;
         } else if (!playing) {
             return;
@@ -168,7 +166,6 @@ public class GamePlay extends JPanel implements ActionListener {
 
             double distance = ballCenter - paddleCenter;
             ballXSpeed = (int) Math.round(distance / (paddleWidth / Math.abs(ballYSpeed)));
-            System.out.println("test");
             oneTickDelay = true;
         }
 
