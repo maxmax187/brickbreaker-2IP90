@@ -3,18 +3,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 
-
-
-//!!!!!!!!!!!!!!
-// to remember: objects origin coordinates are top-left
-
-// TODO LIST
-// ability to restart game after win/loss
-// create main menu
-// System.exit(0); // exits the application
-
-// add comments everywhere/ follow coding standard
-
 /**
  *  Main gameplay loop, including starting a game, keeping track of ball, paddle & bricks and 
  *  game completion.
@@ -24,6 +12,7 @@ public class GamePlay extends JPanel implements ActionListener {
     private boolean finished = false;
     private boolean oneTickDelay = false;
     private MapGen brickMap;
+    private Timer timer;
 
     // borders, later defined to be the same as window borders defined in Main.java
     private int bottomBorder;   
@@ -60,22 +49,13 @@ public class GamePlay extends JPanel implements ActionListener {
         bottomBorder = (int) Math.floor(height * 0.95);
         rightBorder = width;
 
-        brickMap = new MapGen(brickRowAmt, brickColAmt); // Initialize the brick matrix
-        totalBricks = brickRowAmt * brickColAmt;
-
         // make sure the bricks are centered
         int totalBrickWidth = brickColAmt * brickWidth + (brickColAmt - 1) * brickGapSize;
         brickX = (int) Math.floor((width - 10 - totalBrickWidth) / 2);
         brickY = brickX;
-        
-        paddleX = (int) Math.floor(width / 2 - (paddleWidth / 2));
-        paddleY = (int) Math.floor(height * 0.90 - paddleHeight);
-
-        ballX = (int) Math.round(paddleX + (paddleWidth / 2) - ballRadius);
-        ballY = (int) Math.round(paddleY - (1.2 * ballSize)); 
 
         // Initialize event loop.
-        Timer timer = new Timer(5, this);
+        timer = new Timer(5, this);
         timer.start();
     }
 
@@ -94,15 +74,41 @@ public class GamePlay extends JPanel implements ActionListener {
 
             String text = totalBricks <= 0 ? "You won!" : "Game Over!"; // check win condition
             int textWidth = g.getFontMetrics().stringWidth(text);
-            g.drawString(text, (getWidth() - textWidth) / 2, getHeight() / 2);
+            g.drawString(text, (getWidth() - textWidth) / 2, (int) Math.floor(getHeight() * 0.45));
 
-            // String enterString = "press ENTER to try again!";
-            // textWidth = g.getFontMetrics().stringWidth(enterString);
-            // int textHeight = (int) Math.floor(getHeight() * 0.6);
-            // g.drawString(enterString, (getWidth() - textWidth) / 2, textHeight);
+            g.setFont(new Font("Arial", Font.BOLD, 18));
+
+            String enterString = "press ENTER to try again!";
+            textWidth = g.getFontMetrics().stringWidth(enterString);
+            int textHeight = (int) Math.floor(getHeight() * 0.50);
+            g.drawString(enterString, (getWidth() - textWidth) / 2, textHeight);
+
+            String spaceString = "press SPACE to exit";
+            textWidth = g.getFontMetrics().stringWidth(spaceString);
+            textHeight = (int) Math.floor(getHeight() * 0.55);
+            g.drawString(spaceString, (getWidth() - textWidth) / 2, textHeight);
         }
 
-        if (!playing) {
+        if (!playing && !finished) {
+            g.setColor(Color.WHITE); // Set the color to clear the screen
+            g.fillRect(0, 0, getWidth(), getHeight());
+
+            // Display text for starting game
+            g.setColor(Color.BLACK);
+            g.setFont(new Font("Arial", Font.BOLD, 30));
+
+            String text = "press ENTER to play!";
+            int textWidth = g.getFontMetrics().stringWidth(text);
+            g.drawString(text, (getWidth() - textWidth) / 2, (int) Math.floor(getHeight() * 0.45));
+
+            g.setFont(new Font("Arial", Font.BOLD, 18));
+
+            String spaceString = "press SPACE to exit";
+            textWidth = g.getFontMetrics().stringWidth(spaceString);
+            int textHeight = (int) Math.floor(getHeight() * 0.50);
+            g.drawString(spaceString, (getWidth() - textWidth) / 2, textHeight);
+            return;
+        } else if (!playing) {
             return;
         }
 
@@ -166,19 +172,16 @@ public class GamePlay extends JPanel implements ActionListener {
 
                 Rectangle brickObj = new Rectangle(brickObjX, brickObjY, brickWidth, brickHeight);
 
-                if (brickMap.brickMap[i][j] && ballObj.intersects(brickObj)) {
-                    // Get the center of the ball for collision direction analysis
-                    int ballCenterX = ballX + ballRadius;
-                    int ballCenterY = ballY + ballRadius;
-                    
+                if (brickMap.brickMap[i][j] && ballObj.intersects(brickObj)) {                   
                     // Calculate the distance between ball and brick edges
-                    int dx = Math.min(Math.abs(ballCenterX - brickObjX), 
-                        Math.abs(ballCenterX - (brickObjX + brickObj.width)));
-                    int dy = Math.min(Math.abs(ballCenterY - brickObjY), 
-                            Math.abs(ballCenterY - (brickObjY + brickObj.height)));
+                    int dx = Math.min(Math.abs(ballX - (brickObjX + brickWidth)), 
+                        Math.abs((ballX + 2 * ballRadius) - brickObjX));
+                    int dy = Math.min(Math.abs(ballY - (brickObjY + brickHeight)), 
+                        Math.abs((ballY + 2 * ballRadius) - brickObjY));
+
 
                     // Check collision direction based on the distances
-                    if (dx == dy) { // if the ball collides with the corner of a block
+                    if (dx == dy) { // if the ball collides with the corner 
                         ballXSpeed = -ballXSpeed;
                         ballYSpeed = -ballYSpeed;
                     } else if (dx < dy) {   // horizontal collision
@@ -236,12 +239,29 @@ public class GamePlay extends JPanel implements ActionListener {
         }
     }
 
-    // TODO fix game over replay & stuff
+    /**
+     * Starts the gameplay.
+     */
     public void startGame() {
-        System.out.println("enter");
         if (playing) {
             return;
         }
+        brickMap = new MapGen(brickRowAmt, brickColAmt); // Initialize the brick matrix
+        totalBricks = brickRowAmt * brickColAmt;
+        
+        paddleX = (int) Math.floor(rightBorder / 2 - (paddleWidth / 2));
+        paddleY = (int) Math.floor(bottomBorder * 0.90 - paddleHeight);
+
+        ballX = (int) Math.round(paddleX + (paddleWidth / 2) - ballRadius);
+        ballY = (int) Math.round(paddleY - (1.2 * ballSize)); 
+
+        ballXSpeed = 0;
+        int absSpeed = Math.abs(ballYSpeed);
+        do {
+            // Generate a random number between -4 and 4 (excluding 0)
+            ballXSpeed = (int) (Math.floor(Math.random() * (absSpeed * 2 - 1)) - absSpeed);
+        } while (ballXSpeed == 0);
+
         playing = true;
         finished = false;
     }

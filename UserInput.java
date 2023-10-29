@@ -25,6 +25,10 @@ public class UserInput implements KeyListener {
         if (key == KeyEvent.VK_RIGHT) { 
             gamePlay.moveRight();
         }
+
+        if (key == KeyEvent.VK_SPACE) {
+            System.exit(0); // exits the application
+        }
     }
 
     @Override
