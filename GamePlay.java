@@ -9,10 +9,9 @@ import javax.swing.*;
 // to remember: objects origin coordinates are top-left
 
 // TODO LIST
-// create win condition
-// create game over screen
-// create win screen
+// ability to restart game after win/loss
 // create main menu
+// System.exit(0); // exits the application
 
 // add comments everywhere/ follow coding standard
 
@@ -23,30 +22,31 @@ import javax.swing.*;
 public class GamePlay extends JPanel implements ActionListener {
     private boolean playing = false;
     private boolean finished = false;
+    private boolean oneTickDelay = false;
     private MapGen brickMap;
 
     // borders, later defined to be the same as window borders defined in Main.java
     private int bottomBorder;   
     private int rightBorder;
 
-    private int ballX = 1; // Ball X-coordinate 100
-    private int ballY = 1; // Ball Y-coordinate 450
+    private int ballX; // Ball X-coordinate 100
+    private int ballY; // Ball Y-coordinate 450
     private int ballXSpeed = -2; // Ball X-speed
     private int ballYSpeed = -2; // Ball Y-speed
-    private int ballSize = 15; // diameter of the ball
+    private int ballSize = 15; // diameter of the ball          15!!!!
 
-    private int paddleX = 100; // Paddle X-coordinate
-    private int paddleY = 480;
+    private int paddleX; // Paddle X-coordinate
+    private int paddleY;
     private int paddleWidth = 60; // Paddle width
     private int paddleHeight = 10;
 
-    private int brickX = 50; // Brick X-coordinate
-    private int brickY = 50; // Brick Y-coordinate
+    private int brickX; // Brick matrix generation left most starting X-coordinate
+    private int brickY; // Brick matrix generation upper most starting Y-coordinate
     private int brickWidth = 60;
     private int brickHeight = 20;
     private int brickGapSize = 10;  // gap in between the bricks both vertically and horizontally
 
-    private int brickRowAmt = 2;
+    private int brickRowAmt = 4;
     private int brickColAmt = 4;
     private int totalBricks;
 
@@ -62,6 +62,18 @@ public class GamePlay extends JPanel implements ActionListener {
         brickMap = new MapGen(brickRowAmt, brickColAmt); // Initialize the brick matrix
         totalBricks = brickRowAmt * brickColAmt;
 
+        // make sure the bricks are centered
+        int totalBrickWidth = brickColAmt * brickWidth + (brickColAmt - 1) * brickGapSize;
+        brickX = (int) Math.floor((width - 10 - totalBrickWidth) / 2);
+        brickY = brickX;
+        
+        paddleX = (int) Math.floor(width / 2 - (paddleWidth / 2));
+        paddleY = (int) Math.floor(height * 0.90 - paddleHeight);
+
+        ballX = (int) Math.round(paddleX + (paddleWidth / 2) - (ballSize / 2));
+        ballY = (int) Math.round(paddleY - (1.1 * ballSize)); 
+
+        // Initialize event loop.
         Timer timer = new Timer(5, this);
         timer.start();
     }
@@ -116,6 +128,12 @@ public class GamePlay extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        // to prevent ball not correctly reacting to a collision with 2 blocks at once
+        if (oneTickDelay) {
+            oneTickDelay = false;  
+            return;
+        }
+
         if (playing) {
             ballX += ballXSpeed;
             ballY += ballYSpeed;    
@@ -129,11 +147,13 @@ public class GamePlay extends JPanel implements ActionListener {
         Rectangle paddleObj = new Rectangle(paddleX, paddleY, paddleWidth, paddleHeight);
         if (ballObj.intersects(paddleObj)) {
             ballYSpeed = -ballYSpeed;
+            oneTickDelay = true;
         }
 
         // Ball-brick collisions
+        outerloop:
         for (int i = 0; i < brickMap.brickMap.length; i++) {
-            for (int j = 0; j < brickMap.brickMap[i].length; j++) {    
+            for (int j = 0; j < brickMap.brickMap[i].length; j++) {  
                 int brickObjX = brickX + (brickWidth + brickGapSize) * i;
                 int brickObjY = brickY + (brickHeight + brickGapSize) * j;
 
@@ -143,6 +163,8 @@ public class GamePlay extends JPanel implements ActionListener {
                     brickMap.setBricksValue(false, i, j);
                     totalBricks--;
                     ballYSpeed = -ballYSpeed;  
+                    oneTickDelay = true;
+                    break outerloop; // part of preventing multiple block collision in 1 tick
                 }
             }
         }
@@ -166,7 +188,6 @@ public class GamePlay extends JPanel implements ActionListener {
         if (ballY >= bottomBorder) {
             playing = false;
             finished = true;
-            // System.exit(0); // exits the application
         }
 
         repaint();
