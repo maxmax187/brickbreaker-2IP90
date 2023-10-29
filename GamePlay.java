@@ -104,10 +104,17 @@ public class GamePlay extends JPanel implements ActionListener {
 
             g.setFont(new Font("Arial", Font.BOLD, 18));
 
+            String controlString = "use RIGHT and LEFT arrowkeys to move";
+            textWidth = g.getFontMetrics().stringWidth(controlString);
+            int textHeight = (int) Math.floor(getHeight() * 0.55);
+            g.drawString(controlString, (getWidth() - textWidth) / 2, textHeight);
+
             String spaceString = "press SPACE to exit";
             textWidth = g.getFontMetrics().stringWidth(spaceString);
-            int textHeight = (int) Math.floor(getHeight() * 0.50);
+            textHeight = (int) Math.floor(getHeight() * 0.50);
             g.drawString(spaceString, (getWidth() - textWidth) / 2, textHeight);
+
+
             return;
         } else if (!playing) {
             return;
